@@ -4,6 +4,9 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const app = express()
 
+const jwt = require('jsonwebtoken');
+const secret = 'lkkfamhfvhgdghfsalkgadjnvkgjdhgglfd'
+
 // password encryption
 const { genSaltSync } = require('bcrypt');
 const bcrypt = require('bcrypt');
@@ -24,7 +27,7 @@ db.on('error', (err)=> {
 
 const User = require('./models/User');
 
-app.use(cors())
+app.use(cors({credentials:true, origin:'http://localhost:5175'}))
 app.use(bodyParser.json())
 
 app.post('/register', async (req, res)=>{
@@ -37,6 +40,21 @@ app.post('/register', async (req, res)=>{
         res.json(userDoc)
     } catch (e){
         res.json(e)
+    }
+})
+
+app.post('/login', async (req, res)=>{
+    const {userName, password} = req.body
+    const userDoc = await User.findOne({userName})
+    const passOk = bcrypt.compareSync(password, userDoc.password)
+    if(passOk) {
+        //logged in
+        jwt.sign({userName, id:userDoc._id}, secret, {}, (err, token) =>{
+            if(err) throw err
+            res.cookie('token', token).json('ok')
+        })
+    }else{
+        res.json('wrong credentials')
     }
 })
 
