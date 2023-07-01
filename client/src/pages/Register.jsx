@@ -14,7 +14,7 @@ const Register = () => {
     if (response.ok == 200) {
       alert('registration successful')
     }else{
-      alert('registration sccessfull')
+      alert('registration successful')
     }
   }
   return (    

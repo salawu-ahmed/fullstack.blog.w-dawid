@@ -1,12 +1,15 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { UserContext } from '../UserContext'
 
 const Login = () => {
   const navigate = useNavigate()
 
+  
   const [userName, setUserName] = useState('')
-  const [password, setpassword] = useState('')
+  const [password, setPassword] = useState('')
   const [redirect, setRedirect] = useState(false)
+  const {setUserInfo} = useContext(UserContext)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -18,13 +21,17 @@ const Login = () => {
     })
     // redirecting to home page if the user credentials are correct 
     if(response.ok) {
-      setRedirect('/')
+      response.json()
+        .then(userInfo => {
+          setUserInfo(userInfo)
+          setRedirect(true)
+        })
     }else {
       alert('wrong credentials')
     }
-    if (redirect) navigate('/') //conditional rendering
   }
-
+  
+  if (redirect) navigate('/') //conditional rendering
 
   return (
     <form className='login' onSubmit={handleSubmit}>
@@ -38,7 +45,7 @@ const Login = () => {
         <input 
           type="password" 
           placeholder='password' 
-          onChange = {(e) => setpassword(e.target.value)}
+          onChange = {(e) => setPassword(e.target.value)}
           value = {password}
         />
         <button>Login</button>

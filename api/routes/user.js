@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 // password encryption
 
 const bcrypt = require('bcrypt');
-const { genSaltSync } = require('bcrypt');
+// const { genSaltSync } = require('bcrypt');
 const saltRounds = 10
 const salt = bcrypt.genSaltSync(saltRounds)
 
@@ -20,10 +20,13 @@ router.post('/login', async (req, res)=>{
         //logged in
         jwt.sign({userName, id:userDoc._id}, secret, {}, (err, token) =>{
             if(err) throw err
-            res.cookie('token', token).json('ok')
+            res.cookie('token', token).json({
+                id:userDoc._id,
+                userName
+            })
         })
     }else{
-        res.json('wrong credentials')
+        res.status(400).json('wrong credentials')
     }
 })
 
@@ -41,6 +44,18 @@ router.post('/register', async (req, res)=>{
     } catch (e){
         res.json(e)
     }
+})
+
+router.get('/profile', (req, res) => {
+    const {token} = req.cookie
+    jwt.verify(token, secret, {}, (err, info) => {
+        if (err) throw err
+        res.json(info)
+    })
+})
+
+router.post('/logout', (req, res) => {
+    res.cookie('token', "").json('ok')
 })
 
 module.exports = router
